@@ -1,0 +1,911 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Zobley — freelance marketplace</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20width%3D%22512%22%20height%3D%22512%22%20viewBox%3D%220%200%20512%20512%22%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20role%3D%22img%22%20aria-label%3D%22Zobley%20app%20icon%22%3E%3Cdefs%3E%3ClinearGradient%20id%3D%22bg%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%221%22%20y2%3D%221%22%3E%3Cstop%20offset%3D%220%25%22%20stop-color%3D%22%23FFC24D%22/%3E%3Cstop%20offset%3D%22100%25%22%20stop-color%3D%22%23FF8A3D%22/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect%20width%3D%22512%22%20height%3D%22512%22%20rx%3D%22112%22%20fill%3D%22url%28%23bg%29%22/%3E%3Cpath%20d%3D%22M%20122%20246%20Q%20256%20100%20390%20246%20L%20390%20208%20Q%20256%2062%20122%20208%20Z%22%20fill%3D%22%236C5CE8%22/%3E%3Crect%20x%3D%22110%22%20y%3D%22208%22%20width%3D%22292%22%20height%3D%2246%22%20rx%3D%2223%22%20fill%3D%22%234A3FC4%22/%3E%3Ccircle%20cx%3D%22206%22%20cy%3D%22320%22%20r%3D%2224%22%20fill%3D%22%23241300%22/%3E%3Ccircle%20cx%3D%22306%22%20cy%3D%22320%22%20r%3D%2224%22%20fill%3D%22%23241300%22/%3E%3Cpath%20d%3D%22M%20200%20372%20Q%20256%20410%20312%20372%22%20fill%3D%22none%22%20stroke%3D%22%23241300%22%20stroke-width%3D%2218%22%20stroke-linecap%3D%22round%22/%3E%3Cpath%20d%3D%22M%2090%20430%20Q%20256%20380%20422%20430%22%20fill%3D%22none%22%20stroke%3D%22%23FFF6E5%22%20stroke-width%3D%2210%22%20stroke-linecap%3D%22round%22%20stroke-dasharray%3D%222%2024%22%20opacity%3D%220.55%22/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0A0B18;
+    --bg-2:#0E1024;
+    --surface:rgba(22,24,48,0.72);
+    --surface-solid:#161830;
+    --surface-2:rgba(255,255,255,0.05);
+    --ink:#F2F2FC;
+    --ink-soft:#A6A9D6;
+    --ink-faint:#5F628E;
+    --indigo:#6C5CE8;
+    --indigo-soft:#8A7CFF;
+    --indigo-dark:#12132A;
+    --indigo-glow:rgba(108,92,232,0.5);
+    --marigold:#FFB020;
+    --marigold-dark:#7A4E00;
+    --marigold-tint:rgba(255,176,32,0.14);
+    --marigold-glow:rgba(255,176,32,0.4);
+    --teal:#2EE6B8;
+    --teal-tint:rgba(46,230,184,0.13);
+    --coral:#FF5C7A;
+    --coral-tint:rgba(255,92,122,0.14);
+    --violet-tint:rgba(138,124,255,0.14);
+    --violet:#B4A8FF;
+    --star:#FFB020;
+    --border:rgba(255,255,255,0.09);
+    --border-soft:rgba(255,255,255,0.05);
+    --radius:14px;
+    --mono:'JetBrains Mono', monospace;
+  }
+  *{box-sizing:border-box;}
+  html{background:var(--bg);}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:'Inter',sans-serif;-webkit-font-smoothing:antialiased;}
+  .display{font-family:'Sora',sans-serif;}
+  #app{
+    max-width:460px;margin:0 auto;min-height:100vh;
+    background:
+      radial-gradient(560px 320px at 12% -6%, rgba(108,92,232,0.16), transparent 60%),
+      radial-gradient(420px 260px at 100% 8%, rgba(255,176,32,0.10), transparent 60%),
+      var(--bg);
+    display:flex;flex-direction:column;position:relative;padding-bottom:86px;
+  }
+  .hidden{display:none !important;}
+
+  #auth-screen{
+    min-height:100vh;display:flex;flex-direction:column;justify-content:center;padding:32px 26px;
+    background:
+      radial-gradient(600px 380px at 15% 0%, rgba(108,92,232,0.30), transparent 60%),
+      radial-gradient(500px 320px at 100% 100%, rgba(255,176,32,0.16), transparent 55%),
+      linear-gradient(165deg, #0D0E22 0%, #08091A 100%);
+    color:#fff;position:relative;overflow:hidden;
+  }
+  #auth-screen::before{
+    content:'';position:absolute;inset:0;pointer-events:none;opacity:0.35;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.045) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.045) 1px, transparent 1px);
+    background-size:34px 34px;
+    mask-image:radial-gradient(560px 420px at 30% 20%, #000, transparent 75%);
+  }
+  .bridge-scene{position:relative;width:100%;max-width:340px;margin:0 0 22px;opacity:0.9;}
+  .bridge-scene svg{width:100%;height:auto;overflow:visible;}
+  .bridge-arc{fill:none;stroke:url(#none);stroke:rgba(255,255,255,0.22);stroke-width:1.6;stroke-dasharray:4 6;}
+  .bridge-node{fill:var(--marigold);filter:drop-shadow(0 0 6px var(--marigold-glow));}
+  .bridge-pulse{fill:var(--indigo-soft);filter:drop-shadow(0 0 8px var(--indigo-glow));}
+  @media (prefers-reduced-motion: reduce){
+    .bridge-pulse animateMotion{display:none;}
+  }
+  .auth-mark{
+    width:52px;height:52px;border-radius:15px;background:linear-gradient(150deg, var(--marigold), #FF8A3D);
+    display:flex;align-items:center;justify-content:center;font-family:'Sora',sans-serif;font-weight:800;
+    color:#241300;font-size:20px;margin-bottom:16px;box-shadow:0 0 0 1px rgba(255,255,255,0.08), 0 10px 30px -8px var(--marigold-glow);
+    position:relative;z-index:1;
+  }
+  .auth-title{font-family:'Sora',sans-serif;font-weight:800;font-size:27px;letter-spacing:-0.3px;position:relative;z-index:1;}
+  .auth-sub{color:var(--ink-soft);font-size:13.5px;margin-top:5px;margin-bottom:26px;line-height:1.5;position:relative;z-index:1;}
+  .auth-card{
+    background:rgba(255,255,255,0.045);border:1px solid rgba(255,255,255,0.10);border-radius:18px;padding:20px;
+    backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);position:relative;z-index:1;
+    box-shadow:0 20px 50px -20px rgba(0,0,0,0.6);
+  }
+  .auth-card label{color:#C7C9F0;}
+  .auth-card input{background:rgba(0,0,0,0.25);border:1px solid rgba(255,255,255,0.14);color:#fff;}
+  .auth-card input:focus{outline:2px solid var(--indigo-soft);outline-offset:1px;border-color:transparent;}
+  .auth-card input::placeholder{color:#63659A;}
+  .auth-toggle{text-align:center;margin-top:16px;font-size:12.5px;color:var(--ink-soft);position:relative;z-index:1;}
+  .auth-toggle span{color:var(--marigold);font-weight:600;cursor:pointer;}
+  .auth-error{background:rgba(255,92,122,0.16);border:1px solid rgba(255,92,122,0.3);color:#FFCBD6;font-size:12px;padding:8px 12px;border-radius:8px;margin-top:12px;}
+  .auth-loading{text-align:center;color:var(--ink-soft);font-size:13px;padding:40px 0;position:relative;z-index:1;}
+
+  .topbar{
+    position:relative;overflow:hidden;
+    background:linear-gradient(155deg, #1B1740 0%, #0F1030 100%);
+    padding:18px 20px 22px;border-radius:0 0 22px 22px;color:#fff;
+    border-bottom:1px solid rgba(255,255,255,0.06);
+  }
+  .topbar::before{
+    content:'';position:absolute;inset:0;pointer-events:none;
+    background-image:linear-gradient(rgba(255,255,255,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px);
+    background-size:22px 22px;
+    mask-image:linear-gradient(180deg, #000, transparent 85%);
+    opacity:0.5;
+  }
+  .topbar::after{
+    content:'';position:absolute;top:-40px;right:-30px;width:160px;height:160px;border-radius:50%;
+    background:radial-gradient(circle, var(--marigold-glow), transparent 70%);opacity:0.5;pointer-events:none;
+  }
+  .topbar-row{display:flex;justify-content:space-between;align-items:flex-start;position:relative;z-index:1;}
+  .brand{display:flex;align-items:center;gap:10px;}
+  .brand-mark{width:34px;height:34px;border-radius:10px;background:linear-gradient(150deg, var(--marigold), #FF8A3D);display:flex;align-items:center;justify-content:center;font-family:'Sora',sans-serif;font-weight:800;color:#241300;font-size:16px;flex-shrink:0;box-shadow:0 6px 18px -6px var(--marigold-glow);}
+  .brand-name{font-family:'Sora',sans-serif;font-weight:700;font-size:19px;letter-spacing:0.2px;}
+  .brand-tag{font-size:11.5px;color:var(--ink-soft);margin-top:1px;font-family:var(--mono);letter-spacing:0.2px;}
+  .who{text-align:right;}
+  .who-name{font-size:12.5px;font-weight:600;}
+  .who-logout{font-size:11px;color:var(--ink-soft);cursor:pointer;margin-top:2px;text-decoration:underline;}
+  .topbar-sub{margin-top:14px;font-size:13px;color:var(--ink-soft);line-height:1.5;position:relative;z-index:1;}
+
+  .section{padding:18px 18px 8px;}
+  .section-head{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:12px;}
+  .section-title{font-family:'Sora',sans-serif;font-weight:700;font-size:16px;color:var(--ink);}
+  .section-count{font-size:11.5px;color:var(--ink-faint);font-family:var(--mono);}
+  .tab-view{display:block;}
+
+  .search-wrap{position:relative;margin-bottom:12px;}
+  .search-wrap input{padding-left:34px;}
+  .search-icon{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--ink-faint);font-size:13px;}
+  .chip-row{display:flex;gap:7px;overflow-x:auto;padding-bottom:4px;margin-bottom:14px;}
+  .chip-row::-webkit-scrollbar{display:none;}
+  .chip{flex-shrink:0;font-size:12px;font-weight:600;padding:6px 13px;border-radius:20px;background:var(--surface-2);border:1px solid var(--border);color:var(--ink-soft);cursor:pointer;white-space:nowrap;transition:background .12s ease, color .12s ease;}
+  .chip.active{background:linear-gradient(135deg, var(--indigo), #4A3FC4);color:#fff;border-color:transparent;box-shadow:0 6px 16px -8px var(--indigo-glow);}
+
+  .card{
+    background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 15px;margin-bottom:10px;
+    backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);transition:border-color .15s ease, transform .15s ease;
+  }
+  .card:hover{border-color:rgba(108,92,232,0.35);}
+  .job-card{display:flex;flex-direction:column;gap:6px;}
+  .job-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;}
+  .job-title{font-weight:600;font-size:14.5px;line-height:1.35;color:var(--ink);}
+  .job-budget{font-family:var(--mono);font-weight:700;font-size:14px;color:var(--teal);white-space:nowrap;}
+  .job-desc{font-size:13px;color:var(--ink-soft);line-height:1.5;}
+  .job-meta{display:flex;align-items:center;gap:8px;margin-top:4px;flex-wrap:wrap;}
+  .tag{font-size:11px;font-weight:600;padding:3px 9px;border-radius:20px;background:var(--surface-2);color:var(--ink-soft);border:1px solid var(--border-soft);}
+  .tag.cat{background:var(--marigold-tint);color:var(--marigold);border-color:rgba(255,176,32,0.25);}
+  .job-foot{display:flex;justify-content:space-between;align-items:center;margin-top:8px;padding-top:10px;border-top:1px solid var(--border-soft);}
+  .poster{font-size:12px;color:var(--ink-faint);}
+  .btn{font-family:'Inter',sans-serif;border:none;border-radius:10px;padding:9px 14px;font-size:13px;font-weight:600;cursor:pointer;transition:transform .08s ease, box-shadow .12s ease;}
+  .btn:active{transform:scale(0.97);}
+  .btn-primary{background:linear-gradient(135deg, var(--indigo), #4A3FC4);color:#fff;box-shadow:0 8px 20px -10px var(--indigo-glow);}
+  .btn-marigold{background:linear-gradient(135deg, var(--marigold), #FF8A3D);color:#241300;box-shadow:0 8px 20px -10px var(--marigold-glow);}
+  .btn-violet{background:var(--violet-tint);color:var(--violet);}
+  .btn-ghost{background:var(--surface-2);color:var(--ink);border:1px solid var(--border);}
+  .btn-block{width:100%;}
+  .btn-sm{padding:6px 11px;font-size:12px;}
+  .btn[disabled]{opacity:0.55;pointer-events:none;}
+
+  .empty{text-align:center;padding:36px 20px;color:var(--ink-faint);}
+  .empty-icon{font-family:'Sora',sans-serif;font-size:28px;font-weight:700;color:rgba(255,255,255,0.08);margin-bottom:6px;}
+  .empty-title{font-weight:600;color:var(--ink-soft);font-size:14px;margin-bottom:3px;}
+  .empty-body{font-size:12.5px;line-height:1.5;}
+
+  label{display:block;font-size:12.5px;font-weight:600;color:var(--ink-soft);margin:14px 0 6px;}
+  label:first-of-type{margin-top:0;}
+  input, textarea, select{width:100%;border:1px solid var(--border);border-radius:10px;padding:10px 12px;font-family:'Inter',sans-serif;font-size:13.5px;background:rgba(255,255,255,0.03);color:var(--ink);}
+  input::placeholder, textarea::placeholder{color:var(--ink-faint);}
+  input:focus, textarea:focus, select:focus{outline:2px solid var(--indigo-soft);outline-offset:1px;border-color:transparent;}
+  textarea{resize:vertical;min-height:70px;}
+  .field-row{display:flex;gap:10px;}
+  .field-row > div{flex:1;}
+  .form-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px 16px 18px;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);}
+  select{color-scheme:dark;}
+
+  .profile-card{display:flex;gap:12px;align-items:flex-start;}
+  .avatar{width:42px;height:42px;border-radius:50%;background:linear-gradient(150deg, var(--indigo), #423894);color:#fff;display:flex;align-items:center;justify-content:center;font-family:'Sora',sans-serif;font-weight:700;font-size:14px;flex-shrink:0;box-shadow:0 6px 16px -8px var(--indigo-glow);overflow:hidden;}
+  .avatar img{width:100%;height:100%;border-radius:50%;object-fit:cover;}
+  .job-image{width:100%;max-height:170px;object-fit:cover;border-radius:10px;margin:2px 0 4px;display:block;}
+  input[type=file]{padding:8px 10px;font-size:12px;color:var(--ink-soft);cursor:pointer;}
+  .img-preview{width:100%;max-height:130px;object-fit:cover;border-radius:10px;margin-top:8px;display:none;border:1px solid var(--border);}
+  .suggest-wrap{margin-top:18px;}
+  .suggest-title{font-family:'Sora',sans-serif;font-weight:700;font-size:14px;margin-bottom:8px;color:var(--ink);}
+  .profile-info{flex:1;min-width:0;}
+  .profile-name{font-weight:600;font-size:14px;color:var(--ink);}
+  .profile-skill{font-size:12.5px;color:var(--marigold);font-weight:600;margin-top:1px;}
+  .profile-bio{font-size:12.5px;color:var(--ink-soft);margin-top:5px;line-height:1.5;}
+  .profile-rate{font-family:var(--mono);font-weight:700;font-size:13px;color:var(--indigo-soft);white-space:nowrap;}
+  .stars{color:var(--star);font-size:12px;letter-spacing:1px;}
+  .rating-line{display:flex;align-items:center;gap:6px;margin-top:4px;}
+  .rating-count{font-size:11.5px;color:var(--ink-faint);font-family:var(--mono);}
+  .rate-btn-row{display:flex;gap:6px;margin-top:9px;}
+  .star-picker{display:flex;gap:4px;margin:8px 0;}
+  .star-pick{font-size:22px;color:rgba(255,255,255,0.12);cursor:pointer;}
+  .star-pick.on{color:var(--star);}
+
+  .chat-list-item{display:flex;gap:12px;align-items:center;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:11px 13px;margin-bottom:9px;cursor:pointer;position:relative;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);}
+  .chat-list-item:active{background:var(--surface-2);}
+  .chat-preview{flex:1;min-width:0;}
+  .chat-preview-name{font-weight:600;font-size:13.5px;color:var(--ink);}
+  .chat-preview-msg{font-size:12px;color:var(--ink-faint);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px;}
+  .unread-dot{width:9px;height:9px;border-radius:50%;background:var(--coral);flex-shrink:0;box-shadow:0 0 8px var(--coral);}
+  .chat-thread{display:none;flex-direction:column;height:calc(100vh - 260px);min-height:320px;}
+  .chat-thread.active{display:flex;}
+  .chat-thread-head{display:flex;align-items:center;gap:10px;padding:12px 18px;border-bottom:1px solid var(--border);}
+  .chat-back{background:none;border:none;font-size:18px;color:var(--indigo-soft);cursor:pointer;padding:4px 6px 4px 0;}
+  .chat-body{flex:1;overflow-y:auto;padding:14px 18px;display:flex;flex-direction:column;gap:8px;}
+  .bubble{max-width:75%;padding:9px 12px;border-radius:14px;font-size:13px;line-height:1.4;}
+  .bubble.me{align-self:flex-end;background:linear-gradient(135deg, var(--indigo), #4A3FC4);color:#fff;border-bottom-right-radius:4px;}
+  .bubble.them{align-self:flex-start;background:var(--surface-2);color:var(--ink);border:1px solid var(--border-soft);border-bottom-left-radius:4px;}
+  .chat-input-row{display:flex;gap:8px;padding:12px 18px;border-top:1px solid var(--border);background:var(--bg-2);}
+  .chat-input-row input{flex:1;}
+
+  .bottomnav{
+    position:fixed;bottom:10px;left:50%;transform:translateX(-50%);width:calc(100% - 24px);max-width:436px;
+    background:rgba(20,22,44,0.75);border:1px solid rgba(255,255,255,0.08);border-radius:20px;display:flex;
+    padding:8px 6px calc(8px + env(safe-area-inset-bottom));backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+    box-shadow:0 16px 40px -16px rgba(0,0,0,0.65);
+  }
+  .nav-btn{flex:1;background:none;border:none;display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 2px;cursor:pointer;color:var(--ink-faint);font-family:'Inter',sans-serif;font-size:10.5px;font-weight:600;position:relative;}
+  .nav-btn.active{color:var(--indigo-soft);}
+  .nav-dot{width:20px;height:20px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:12px;}
+  .nav-btn.active .nav-dot{background:var(--violet-tint);color:var(--indigo-soft);box-shadow:0 0 0 1px rgba(138,124,255,0.3);}
+  .nav-badge{position:absolute;top:2px;right:22%;width:8px;height:8px;border-radius:50%;background:var(--coral);box-shadow:0 0 8px var(--coral);}
+
+  .banner{background:var(--teal-tint);color:var(--teal);border:1px solid rgba(46,230,184,0.25);font-size:11.5px;padding:8px 12px;border-radius:10px;margin:0 18px 8px;line-height:1.4;}
+  .toast{position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:rgba(20,22,44,0.92);border:1px solid rgba(255,255,255,0.1);color:#fff;font-size:12.5px;padding:9px 16px;border-radius:20px;opacity:0;pointer-events:none;transition:opacity .2s ease;max-width:400px;text-align:center;z-index:50;backdrop-filter:blur(14px);}
+  .toast.show{opacity:1;}
+
+  ::-webkit-scrollbar{width:0;height:0;}
+</style>
+</head>
+<body>
+
+<div id="auth-screen">
+  <div class="bridge-scene" aria-hidden="true">
+    <svg viewBox="0 0 400 140" preserveAspectRatio="none">
+      <path class="bridge-arc" d="M 10 120 Q 200 10 390 120" />
+      <circle class="bridge-node" cx="10" cy="120" r="6"/>
+      <circle class="bridge-node" cx="390" cy="120" r="6"/>
+      <circle class="bridge-pulse" r="3.5"><animateMotion dur="3.2s" repeatCount="indefinite" path="M 10 120 Q 200 10 390 120"/></circle>
+    </svg>
+  </div>
+  <div class="auth-mark"><svg viewBox="0 0 100 100" width="30" height="30" role="img" aria-label="Zobley mascot"><path d="M 18 46 Q 50 12 82 46 L 82 34 Q 50 2 18 34 Z" fill="#6C5CE8"/><rect x="14" y="34" width="72" height="12" rx="6" fill="#4A3FC4"/><circle cx="50" cy="60" r="34" fill="none"/><circle cx="38" cy="60" r="6" fill="#241300"/><circle cx="62" cy="60" r="6" fill="#241300"/><path d="M 38 76 Q 50 86 62 76" fill="none" stroke="#241300" stroke-width="4.5" stroke-linecap="round"/></svg></div>
+  <div class="auth-title">Zobley</div>
+  <div class="auth-sub">your work, your platform — log in to get started.</div>
+
+  <div class="auth-card" id="auth-form-card">
+    <label>Name</label>
+    <input type="text" id="auth-name" placeholder="e.g. Rohan Sharma">
+    <label>Password (min 6 characters)</label>
+    <input type="password" id="auth-pass" placeholder="••••••••">
+    <div id="auth-error" class="auth-error hidden"></div>
+    <button class="btn btn-marigold btn-block" style="margin-top:18px;" onclick="handleAuth()" id="auth-btn">Login</button>
+  </div>
+  <div class="auth-loading hidden" id="auth-loading">Connecting...</div>
+  <div class="auth-toggle" id="auth-toggle">Don't have an account? <span onclick="toggleAuthMode()">Sign up</span></div>
+</div>
+
+<div id="app" class="hidden">
+
+  <div class="topbar">
+    <div class="topbar-row">
+      <div class="brand">
+        <div class="brand-mark"><svg viewBox="0 0 100 100" width="20" height="20" role="img" aria-label="Zobley mascot"><path d="M 18 46 Q 50 12 82 46 L 82 34 Q 50 2 18 34 Z" fill="#6C5CE8"/><rect x="14" y="34" width="72" height="12" rx="6" fill="#4A3FC4"/><circle cx="38" cy="60" r="6" fill="#241300"/><circle cx="62" cy="60" r="6" fill="#241300"/><path d="M 38 76 Q 50 86 62 76" fill="none" stroke="#241300" stroke-width="4.5" stroke-linecap="round"/></svg></div>
+        <div>
+          <div class="brand-name">Zobley</div>
+          <div class="brand-tag">your work, your platform</div>
+        </div>
+      </div>
+      <div class="who">
+        <div class="who-name" id="who-name">—</div>
+        <div class="who-logout" onclick="logout()">Logout</div>
+      </div>
+    </div>
+    <div class="topbar-sub" id="topbar-sub">Post jobs, find freelancers, or find work — all in one place.</div>
+  </div>
+
+  <div class="banner">Your data is now saved for real (Firebase) — works on Netlify, Vercel, anywhere.</div>
+
+  <div class="tab-view" id="view-jobs">
+    <div class="section">
+      <div class="search-wrap">
+        <span class="search-icon">⌕</span>
+        <input type="text" id="jobs-search" placeholder="Search job title or keyword..." oninput="renderJobs()">
+      </div>
+      <div class="chip-row" id="jobs-chips"></div>
+      <div class="section-head">
+        <div class="section-title">Open jobs</div>
+        <div class="section-count" id="jobs-count">0 jobs</div>
+      </div>
+      <div id="jobs-list"></div>
+    </div>
+  </div>
+
+  <div class="tab-view hidden" id="view-post">
+    <div class="section">
+      <div class="section-title" style="margin-bottom:12px;">Post a new job</div>
+      <div class="form-card">
+        <label>Job title</label>
+        <input type="text" id="post-title" placeholder="e.g. Need Instagram reels edited">
+        <label>Details</label>
+        <textarea id="post-desc" placeholder="Describe what needs to be done, scope, deadline, etc."></textarea>
+        <div class="field-row">
+          <div>
+            <label>Category</label>
+            <select id="post-category">
+              <option>Video editing</option>
+              <option>Graphic design</option>
+              <option>Content writing</option>
+              <option>Social media</option>
+              <option>Web/App dev</option>
+              <option>Voiceover</option>
+              <option>Other</option>
+            </select>
+          </div>
+          <div>
+            <label>Budget (₹)</label>
+            <input type="text" id="post-budget" placeholder="500">
+          </div>
+        </div>
+        <label>Reference image (optional)</label>
+        <input type="file" id="post-image" accept="image/*" onchange="previewImage('post-image','post-image-preview')">
+        <img id="post-image-preview" class="img-preview">
+        <button class="btn btn-primary btn-block" style="margin-top:18px;" onclick="postJob()" id="post-btn">Post job</button>
+      </div>
+      <div class="suggest-wrap hidden" id="suggest-wrap">
+        <div class="suggest-title">Suggested freelancers for this job</div>
+        <div id="suggest-list"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="tab-view hidden" id="view-profiles">
+    <div class="section">
+      <div class="search-wrap">
+        <span class="search-icon">⌕</span>
+        <input type="text" id="profiles-search" placeholder="Search by skill — e.g. 'editing'..." oninput="renderProfiles()">
+      </div>
+      <div class="section-head">
+        <div class="section-title">Freelancers</div>
+        <button class="btn btn-marigold btn-sm" onclick="openMyProfileForm()">Create your profile</button>
+      </div>
+      <div id="my-profile-form" class="form-card hidden" style="margin-bottom:14px;">
+        <label>Main skill</label>
+        <input type="text" id="prof-skill" placeholder="Video editor">
+        <label>Short bio</label>
+        <textarea id="prof-bio" placeholder="What you do, your experience..."></textarea>
+        <label>Rate (per job or per hour, ₹)</label>
+        <input type="text" id="prof-rate" placeholder="300/reel">
+        <label>Photo (optional)</label>
+        <input type="file" id="prof-photo" accept="image/*" onchange="previewImage('prof-photo','prof-photo-preview')">
+        <img id="prof-photo-preview" class="img-preview">
+        <button class="btn btn-primary btn-block" style="margin-top:16px;" onclick="saveProfile()">Save profile</button>
+      </div>
+      <div id="profiles-list"></div>
+    </div>
+  </div>
+
+  <div class="tab-view hidden" id="view-chat">
+    <div class="section" id="chat-list-wrap">
+      <div class="section-head">
+        <div class="section-title">Messages</div>
+      </div>
+      <div id="chats-list"></div>
+    </div>
+    <div class="chat-thread" id="chat-thread">
+      <div class="chat-thread-head">
+        <button class="chat-back" onclick="closeThread()">←</button>
+        <div class="profile-name" id="thread-name">—</div>
+      </div>
+      <div class="chat-body" id="chat-body"></div>
+      <div class="chat-input-row">
+        <input type="text" id="chat-input" placeholder="Type a message...">
+        <button class="btn btn-primary btn-sm" onclick="sendMsg()">Send</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="bottomnav">
+    <button class="nav-btn active" data-tab="jobs" onclick="switchTab('jobs')"><div class="nav-dot">☰</div>Jobs</button>
+    <button class="nav-btn" data-tab="post" onclick="switchTab('post')"><div class="nav-dot">+</div>Post</button>
+    <button class="nav-btn" data-tab="profiles" onclick="switchTab('profiles')"><div class="nav-dot">◐</div>Profiles</button>
+    <button class="nav-btn" data-tab="chat" onclick="switchTab('chat')"><div class="nav-dot">✉</div>Chat<span class="nav-badge hidden" id="chat-badge"></span></button>
+  </div>
+
+  <div class="toast" id="toast"></div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import {
+  getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword,
+  onAuthStateChanged, signOut, updateProfile
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import {
+  getFirestore, collection, addDoc, doc, setDoc, getDoc, getDocs,
+  query, onSnapshot, serverTimestamp, updateDoc, arrayUnion, orderBy
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import {
+  getStorage, ref, uploadBytes, getDownloadURL
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyAhd10JgBcSsSDTjV3spsLon_uQllJ-A7Q",
+  authDomain: "kaamsetu-feec2.firebaseapp.com",
+  projectId: "kaamsetu-feec2",
+  storageBucket: "kaamsetu-feec2.firebasestorage.app",
+  messagingSenderId: "232527156688",
+  appId: "1:232527156688:web:538fb6a1f09032053a95d5"
+};
+
+const fbApp = initializeApp(firebaseConfig);
+const auth = getAuth(fbApp);
+const db = getFirestore(fbApp);
+const storage = getStorage(fbApp);
+
+const CATEGORIES = ["Video editing","Graphic design","Content writing","Social media","Web/App dev","Voiceover","Other"];
+let jobs = [];
+let profiles = {};        // keyed by uid
+let chatsCache = {};       // keyed by chatId -> {participants, names, messages, readBy}
+let unsubChats = [];
+let currentUid = null;
+let currentName = null;
+let activeThread = null;   // {uid, name}
+let activeCategory = "All";
+let authMode = "login";
+
+function toast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 1800);
+}
+function initials(name){
+  return (name||'?').trim().split(/\s+/).slice(0,2).map(w=>w[0]?.toUpperCase()||'').join('');
+}
+function escapeHtml(str){
+  if(str===undefined || str===null) return '';
+  return String(str).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+function escapeAttr(str){ return escapeHtml(str).replace(/'/g,"&#39;"); }
+function nameToEmail(name){
+  const clean = name.toLowerCase().replace(/[^a-z0-9]/g,'');
+  return clean + "@kaamsetu-users.app";
+}
+function chatId(a,b){ return [a,b].sort().join("__"); }
+
+function previewImage(inputId, imgId){
+  const input = document.getElementById(inputId);
+  const img = document.getElementById(imgId);
+  const file = input.files && input.files[0];
+  if(!file){ img.style.display='none'; return; }
+  img.src = URL.createObjectURL(file);
+  img.style.display='block';
+}
+window.previewImage = previewImage;
+
+async function uploadImageIfAny(inputId, pathPrefix){
+  const input = document.getElementById(inputId);
+  const file = input.files && input.files[0];
+  if(!file) return null;
+  const path = `${pathPrefix}/${currentUid}-${Date.now()}-${file.name}`;
+  const sref = ref(storage, path);
+  await uploadBytes(sref, file);
+  return await getDownloadURL(sref);
+}
+
+/* ---------------- AUTH ---------------- */
+function toggleAuthMode(){
+  authMode = authMode === "login" ? "signup" : "login";
+  document.getElementById('auth-btn').textContent = authMode === "login" ? "Login" : "Sign up";
+  document.getElementById('auth-toggle').innerHTML = authMode === "login"
+    ? `Don't have an account? <span onclick="toggleAuthMode()">Sign up</span>`
+    : `Already have an account? <span onclick="toggleAuthMode()">Log in</span>`;
+  document.getElementById('auth-error').classList.add('hidden');
+}
+window.toggleAuthMode = toggleAuthMode;
+
+async function handleAuth(){
+  const name = document.getElementById('auth-name').value.trim();
+  const pass = document.getElementById('auth-pass').value;
+  const errBox = document.getElementById('auth-error');
+  errBox.classList.add('hidden');
+  if(!name || !pass){ errBox.textContent = "Please enter both name and password"; errBox.classList.remove('hidden'); return; }
+  if(pass.length < 6){ errBox.textContent = "Password must be at least 6 characters"; errBox.classList.remove('hidden'); return; }
+
+  const email = nameToEmail(name);
+  const btn = document.getElementById('auth-btn');
+  btn.disabled = true;
+  btn.textContent = "Please wait...";
+
+  try{
+    if(authMode === "signup"){
+      const cred = await createUserWithEmailAndPassword(auth, email, pass);
+      await updateProfile(cred.user, { displayName: name });
+      await setDoc(doc(db, "users", cred.user.uid), { name, createdAt: serverTimestamp() });
+      toast("Account created");
+    } else {
+      await signInWithEmailAndPassword(auth, email, pass);
+    }
+  }catch(e){
+    let msg = "Something went wrong, please try again";
+    if(e.code === 'auth/email-already-in-use') msg = "This name is already taken, try another or log in";
+    else if(e.code === 'auth/invalid-credential' || e.code === 'auth/wrong-password' || e.code === 'auth/user-not-found') msg = "Incorrect name or password";
+    else if(e.code === 'auth/weak-password') msg = "Password must be at least 6 characters";
+    else if(e.code === 'auth/network-request-failed') msg = "Check your internet connection";
+    errBox.textContent = msg;
+    errBox.classList.remove('hidden');
+  }
+  btn.disabled = false;
+  btn.textContent = authMode === "login" ? "Login" : "Sign up";
+}
+window.handleAuth = handleAuth;
+
+async function logout(){
+  cleanupListeners();
+  await signOut(auth);
+}
+window.logout = logout;
+
+onAuthStateChanged(auth, async (user)=>{
+  if(user){
+    currentUid = user.uid;
+    currentName = user.displayName || "User";
+    document.getElementById('auth-screen').classList.add('hidden');
+    document.getElementById('app').classList.remove('hidden');
+    document.getElementById('who-name').textContent = currentName;
+    document.getElementById('auth-name').value='';
+    document.getElementById('auth-pass').value='';
+    await startListeners();
+  } else {
+    currentUid = null; currentName = null;
+    document.getElementById('app').classList.add('hidden');
+    document.getElementById('auth-screen').classList.remove('hidden');
+  }
+});
+
+/* ---------------- LISTENERS ---------------- */
+function cleanupListeners(){
+  unsubChats.forEach(u=>{ try{u();}catch(e){} });
+  unsubChats = [];
+}
+
+async function startListeners(){
+  renderCategoryChips();
+
+  onSnapshot(query(collection(db, "jobs")), (snap)=>{
+    jobs = [];
+    snap.forEach(d=> jobs.push({ id: d.id, ...d.data() }));
+    jobs.sort((a,b)=> (b.createdAtMs||0) - (a.createdAtMs||0));
+    renderJobs();
+  });
+
+  onSnapshot(query(collection(db, "profiles")), (snap)=>{
+    profiles = {};
+    snap.forEach(d=> profiles[d.id] = d.data());
+    renderProfiles();
+  });
+
+  onSnapshot(query(collection(db, "chats")), (snap)=>{
+    let changed = false;
+    snap.forEach(d=>{
+      const data = d.data();
+      if(data.participants && data.participants.includes(currentUid)){
+        chatsCache[d.id] = data;
+        changed = true;
+      }
+    });
+    if(changed){
+      renderChats();
+      if(activeThread) renderThread();
+    }
+  });
+}
+
+/* ---------------- NAV ---------------- */
+function switchTab(tab){
+  document.querySelectorAll('.tab-view').forEach(v=>v.classList.add('hidden'));
+  document.getElementById('view-'+tab).classList.remove('hidden');
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.toggle('active', b.dataset.tab===tab));
+  const subs = {
+    jobs: "Post jobs, find freelancers, or find work — all in one place.",
+    post: "Post your job here, freelancers will reach out.",
+    profiles: "Create your profile so clients can find you.",
+    chat: "Chat directly with clients or freelancers."
+  };
+  document.getElementById('topbar-sub').textContent = subs[tab];
+  if(tab !== 'chat') closeThread();
+  if(tab === 'chat') document.getElementById('chat-badge').classList.add('hidden');
+}
+window.switchTab = switchTab;
+
+/* ---------------- JOBS ---------------- */
+function renderCategoryChips(){
+  const wrap = document.getElementById('jobs-chips');
+  const cats = ["All", ...CATEGORIES];
+  wrap.innerHTML = cats.map(c=>`<div class="chip ${c===activeCategory?'active':''}" onclick="setCategory('${escapeAttr(c)}')">${escapeHtml(c)}</div>`).join('');
+}
+function setCategory(c){ activeCategory = c; renderCategoryChips(); renderJobs(); }
+window.setCategory = setCategory;
+
+function renderJobs(){
+  const list = document.getElementById('jobs-list');
+  const q = (document.getElementById('jobs-search').value || '').toLowerCase().trim();
+  let filtered = jobs.filter(j=>{
+    const matchesCat = activeCategory === "All" || j.category === activeCategory;
+    const matchesQ = !q || (j.title||'').toLowerCase().includes(q) || (j.desc||'').toLowerCase().includes(q);
+    return matchesCat && matchesQ;
+  });
+  document.getElementById('jobs-count').textContent = filtered.length + (filtered.length===1?' job':' jobs');
+  if(filtered.length===0){
+    list.innerHTML = `<div class="empty"><div class="empty-icon"><svg viewBox="0 0 100 100" width="34" height="34" style="opacity:0.35" role="img" aria-label="Zobley mascot"><path d="M 18 46 Q 50 12 82 46 L 82 34 Q 50 2 18 34 Z" fill="#8A7CFF"/><rect x="14" y="34" width="72" height="12" rx="6" fill="#6C5CE8"/><circle cx="38" cy="60" r="6" fill="#F2F2FC"/><circle cx="62" cy="60" r="6" fill="#F2F2FC"/><path d="M 38 76 Q 50 86 62 76" fill="none" stroke="#F2F2FC" stroke-width="4.5" stroke-linecap="round"/></svg></div><div class="empty-title">No jobs found</div><div class="empty-body">Try clearing filters/search, or post a job yourself.</div></div>`;
+    return;
+  }
+  list.innerHTML = filtered.map(job=>`
+    <div class="card job-card">
+      <div class="job-top">
+        <div class="job-title">${escapeHtml(job.title)}</div>
+        <div class="job-budget">₹${escapeHtml(job.budget || '—')}</div>
+      </div>
+      ${job.imageUrl ? `<img src="${escapeAttr(job.imageUrl)}" class="job-image">` : ''}
+      <div class="job-desc">${escapeHtml(job.desc)}</div>
+      <div class="job-meta"><span class="tag cat">${escapeHtml(job.category)}</span></div>
+      <div class="job-foot">
+        <div class="poster">Posted by ${escapeHtml(job.name)}</div>
+        ${job.uid !== currentUid ? `<button class="btn btn-ghost btn-sm" onclick="startChatWith('${escapeAttr(job.uid)}','${escapeAttr(job.name)}')">Message</button>` : `<span class="tag">Your post</span>`}
+      </div>
+    </div>`).join('');
+}
+
+async function postJob(){
+  const title = document.getElementById('post-title').value.trim();
+  const desc = document.getElementById('post-desc').value.trim();
+  const category = document.getElementById('post-category').value;
+  const budget = document.getElementById('post-budget').value.trim();
+  if(!title || !desc){ toast("Please fill in title and details"); return; }
+  const btn = document.getElementById('post-btn');
+  btn.disabled = true;
+  btn.textContent = "Posting...";
+  try{
+    const imageUrl = await uploadImageIfAny('post-image', 'job-images');
+    await addDoc(collection(db, "jobs"), {
+      title, desc, category, budget, imageUrl: imageUrl || null, name: currentName, uid: currentUid,
+      createdAt: serverTimestamp(), createdAtMs: Date.now()
+    });
+    document.getElementById('post-title').value='';
+    document.getElementById('post-desc').value='';
+    document.getElementById('post-budget').value='';
+    document.getElementById('post-image').value='';
+    document.getElementById('post-image-preview').style.display='none';
+    toast("Job posted");
+    showSuggestions(category);
+  }catch(e){
+    toast("Couldn't post, try again");
+  }
+  btn.disabled = false;
+  btn.textContent = "Post job";
+}
+window.postJob = postJob;
+
+function showSuggestions(category){
+  const words = category.toLowerCase().split(/[\s\/]+/).filter(Boolean);
+  const matches = Object.keys(profiles).filter(uid=>{
+    if(uid === currentUid) return false;
+    const skill = (profiles[uid].skill || '').toLowerCase();
+    const bio = (profiles[uid].bio || '').toLowerCase();
+    return words.some(w => skill.includes(w) || bio.includes(w));
+  }).slice(0, 3);
+  const wrap = document.getElementById('suggest-wrap');
+  const list = document.getElementById('suggest-list');
+  if(matches.length === 0){ wrap.classList.add('hidden'); return; }
+  list.innerHTML = matches.map(uid=>{
+    const p = profiles[uid];
+    return `<div class="card profile-card">
+      <div class="avatar">${p.photoUrl ? `<img src="${escapeAttr(p.photoUrl)}">` : escapeHtml(initials(p.name))}</div>
+      <div class="profile-info">
+        <div class="profile-name">${escapeHtml(p.name)}</div>
+        <div class="profile-skill">${escapeHtml(p.skill)}</div>
+        <div class="rate-btn-row">
+          <button class="btn btn-ghost btn-sm" onclick="startChatWith('${escapeAttr(uid)}','${escapeAttr(p.name)}')">Message</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+  wrap.classList.remove('hidden');
+}
+window.showSuggestions = showSuggestions;
+
+/* ---------------- PROFILES ---------------- */
+function avgRating(p){
+  if(!p.ratings || p.ratings.length===0) return null;
+  const sum = p.ratings.reduce((a,r)=>a+r.stars,0);
+  return (sum / p.ratings.length);
+}
+function starString(avg){
+  const rounded = Math.round(avg);
+  return "★".repeat(rounded) + "☆".repeat(5-rounded);
+}
+
+function renderProfiles(){
+  const list = document.getElementById('profiles-list');
+  const q = (document.getElementById('profiles-search').value || '').toLowerCase().trim();
+  const uids = Object.keys(profiles).filter(uid=>{
+    const p = profiles[uid];
+    return !q || (p.skill||'').toLowerCase().includes(q) || (p.name||'').toLowerCase().includes(q);
+  });
+  if(uids.length===0){
+    list.innerHTML = `<div class="empty"><div class="empty-icon"><svg viewBox="0 0 100 100" width="34" height="34" style="opacity:0.35" role="img" aria-label="Zobley mascot"><path d="M 18 46 Q 50 12 82 46 L 82 34 Q 50 2 18 34 Z" fill="#8A7CFF"/><rect x="14" y="34" width="72" height="12" rx="6" fill="#6C5CE8"/><circle cx="38" cy="60" r="6" fill="#F2F2FC"/><circle cx="62" cy="60" r="6" fill="#F2F2FC"/><path d="M 38 76 Q 50 86 62 76" fill="none" stroke="#F2F2FC" stroke-width="4.5" stroke-linecap="round"/></svg></div><div class="empty-title">No profiles found</div><div class="empty-body">Create your profile so clients can find you.</div></div>`;
+    return;
+  }
+  list.innerHTML = uids.map(uid=>{
+    const p = profiles[uid];
+    const avg = avgRating(p);
+    return `
+    <div class="card profile-card">
+      <div class="avatar">${p.photoUrl ? `<img src="${escapeAttr(p.photoUrl)}">` : escapeHtml(initials(p.name))}</div>
+      <div class="profile-info">
+        <div class="job-top">
+          <div>
+            <div class="profile-name">${escapeHtml(p.name)}</div>
+            <div class="profile-skill">${escapeHtml(p.skill)}</div>
+          </div>
+          <div class="profile-rate">₹${escapeHtml(p.rate || '—')}</div>
+        </div>
+        <div class="profile-bio">${escapeHtml(p.bio)}</div>
+        <div class="rating-line">
+          ${avg ? `<span class="stars">${starString(avg)}</span><span class="rating-count">${avg.toFixed(1)} (${p.ratings.length})</span>` : `<span class="rating-count">No ratings yet</span>`}
+        </div>
+        <div class="rate-btn-row">
+          ${uid !== currentUid ? `<button class="btn btn-ghost btn-sm" onclick="startChatWith('${escapeAttr(uid)}','${escapeAttr(p.name)}')">Message</button>
+          <button class="btn btn-violet btn-sm" onclick="openRateBox('${escapeAttr(uid)}')">Rate</button>` : `<span class="tag">This is your profile</span>`}
+        </div>
+        <div id="rate-box-${escapeAttr(uid)}" class="hidden" style="margin-top:10px;">
+          <div class="star-picker" id="star-picker-${escapeAttr(uid)}"></div>
+          <input type="text" id="rate-comment-${escapeAttr(uid)}" placeholder="Short comment (optional)">
+          <button class="btn btn-primary btn-sm btn-block" style="margin-top:8px;" onclick="submitRating('${escapeAttr(uid)}')">Submit rating</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+let pendingStars = 0;
+function openRateBox(uid){
+  pendingStars = 0;
+  const box = document.getElementById('rate-box-'+uid);
+  box.classList.toggle('hidden');
+  const picker = document.getElementById('star-picker-'+uid);
+  picker.innerHTML = [1,2,3,4,5].map(i=>`<span class="star-pick" data-i="${i}" onclick="pickStar('${escapeAttr(uid)}',${i})">★</span>`).join('');
+}
+window.openRateBox = openRateBox;
+function pickStar(uid, i){
+  pendingStars = i;
+  const picker = document.getElementById('star-picker-'+uid);
+  picker.querySelectorAll('.star-pick').forEach(el=>{
+    el.classList.toggle('on', parseInt(el.dataset.i) <= i);
+  });
+}
+window.pickStar = pickStar;
+async function submitRating(uid){
+  if(pendingStars === 0){ toast("Select a star rating first"); return; }
+  const comment = document.getElementById('rate-comment-'+uid).value.trim();
+  try{
+    await updateDoc(doc(db, "profiles", uid), {
+      ratings: arrayUnion({ byUid: currentUid, byName: currentName, stars: pendingStars, comment })
+    });
+    toast("Rating submitted");
+  }catch(e){ toast("Couldn't save rating"); }
+}
+window.submitRating = submitRating;
+
+function openMyProfileForm(){
+  const existing = profiles[currentUid];
+  if(existing){
+    document.getElementById('prof-skill').value = existing.skill || '';
+    document.getElementById('prof-bio').value = existing.bio || '';
+    document.getElementById('prof-rate').value = existing.rate || '';
+  }
+  document.getElementById('my-profile-form').classList.toggle('hidden');
+}
+window.openMyProfileForm = openMyProfileForm;
+
+async function saveProfile(){
+  const skill = document.getElementById('prof-skill').value.trim();
+  const bio = document.getElementById('prof-bio').value.trim();
+  const rate = document.getElementById('prof-rate').value.trim();
+  if(!skill){ toast("Please enter your skill"); return; }
+  try{
+    const existing = profiles[currentUid];
+    const ratings = (existing && existing.ratings) || [];
+    const photoUrl = (await uploadImageIfAny('prof-photo', 'profile-photos')) || (existing && existing.photoUrl) || null;
+    await setDoc(doc(db, "profiles", currentUid), { name: currentName, skill, bio, rate, ratings, photoUrl });
+    document.getElementById('my-profile-form').classList.add('hidden');
+    document.getElementById('prof-photo').value='';
+    document.getElementById('prof-photo-preview').style.display='none';
+    toast("Profile saved");
+  }catch(e){ toast("Couldn't save"); }
+}
+window.saveProfile = saveProfile;
+
+/* ---------------- CHAT ---------------- */
+function startChatWith(uid, name){
+  switchTab('chat');
+  openThread(uid, name);
+}
+window.startChatWith = startChatWith;
+
+async function openThread(uid, name){
+  activeThread = { uid, name };
+  document.getElementById('chat-list-wrap').classList.add('hidden');
+  document.getElementById('chat-thread').classList.add('active');
+  document.getElementById('thread-name').textContent = name;
+  const id = chatId(currentUid, uid);
+  if(!chatsCache[id]){
+    chatsCache[id] = { participants:[currentUid, uid], names:{[currentUid]:currentName,[uid]:name}, messages:[], readBy:[currentUid] };
+  }
+  try{
+    await setDoc(doc(db, "chats", id), {
+      participants:[currentUid, uid],
+      names:{ [currentUid]: currentName, [uid]: name },
+      readBy: arrayUnion(currentUid)
+    }, { merge: true });
+  }catch(e){}
+  renderThread();
+}
+window.openThread = openThread;
+
+function closeThread(){
+  activeThread = null;
+  document.getElementById('chat-list-wrap').classList.remove('hidden');
+  document.getElementById('chat-thread').classList.remove('active');
+  renderChats();
+}
+window.closeThread = closeThread;
+
+function renderThread(){
+  if(!activeThread) return;
+  const body = document.getElementById('chat-body');
+  const id = chatId(currentUid, activeThread.uid);
+  const data = chatsCache[id];
+  const msgs = (data && data.messages) || [];
+  if(msgs.length===0){
+    body.innerHTML = `<div class="empty" style="padding:24px 8px;"><div class="empty-body">Send ${escapeHtml(activeThread.name)} a message here.</div></div>`;
+    return;
+  }
+  body.innerHTML = msgs.map(m=>`<div class="bubble ${m.from===currentUid?'me':'them'}">${escapeHtml(m.text)}</div>`).join('');
+  body.scrollTop = body.scrollHeight;
+}
+
+async function sendMsg(){
+  const input = document.getElementById('chat-input');
+  const text = input.value.trim();
+  if(!text || !activeThread) return;
+  const id = chatId(currentUid, activeThread.uid);
+  input.value = '';
+  try{
+    await setDoc(doc(db, "chats", id), {
+      participants:[currentUid, activeThread.uid],
+      names:{ [currentUid]: currentName, [activeThread.uid]: activeThread.name },
+      messages: arrayUnion({ from: currentUid, text, time: Date.now() }),
+      readBy: [currentUid]
+    }, { merge: true });
+    await updateDoc(doc(db,"chats",id), { readBy: [currentUid] });
+  }catch(e){ toast("Couldn't send message"); }
+}
+window.sendMsg = sendMsg;
+
+document.addEventListener('keydown', e=>{
+  if(e.key==='Enter' && document.activeElement.id==='chat-input') sendMsg();
+});
+
+function renderChats(){
+  const wrap = document.getElementById('chats-list');
+  const ids = Object.keys(chatsCache).filter(id => chatsCache[id].messages && chatsCache[id].messages.length > 0);
+  let hasUnread = false;
+  if(ids.length===0){
+    wrap.innerHTML = `<div class="empty"><div class="empty-icon"><svg viewBox="0 0 100 100" width="34" height="34" style="opacity:0.35" role="img" aria-label="Zobley mascot"><path d="M 18 46 Q 50 12 82 46 L 82 34 Q 50 2 18 34 Z" fill="#8A7CFF"/><rect x="14" y="34" width="72" height="12" rx="6" fill="#6C5CE8"/><circle cx="38" cy="60" r="6" fill="#F2F2FC"/><circle cx="62" cy="60" r="6" fill="#F2F2FC"/><path d="M 38 76 Q 50 86 62 76" fill="none" stroke="#F2F2FC" stroke-width="4.5" stroke-linecap="round"/></svg></div><div class="empty-title">No messages yet</div><div class="empty-body">Tap "Message" on a job or profile to start a chat.</div></div>`;
+    document.getElementById('chat-badge').classList.add('hidden');
+    return;
+  }
+  wrap.innerHTML = ids.map(id=>{
+    const data = chatsCache[id];
+    const otherUid = data.participants.find(p => p !== currentUid);
+    const otherName = (data.names && data.names[otherUid]) || 'User';
+    const msgs = data.messages;
+    const last = msgs[msgs.length-1];
+    const readBy = data.readBy || [];
+    const unread = !readBy.includes(currentUid) && last.from !== currentUid;
+    if(unread) hasUnread = true;
+    return `<div class="chat-list-item" onclick="openThread('${escapeAttr(otherUid)}','${escapeAttr(otherName)}')">
+      <div class="avatar">${escapeHtml(initials(otherName))}</div>
+      <div class="chat-preview">
+        <div class="chat-preview-name">${escapeHtml(otherName)}</div>
+        <div class="chat-preview-msg">${last ? escapeHtml(last.text) : ''}</div>
+      </div>
+      ${unread ? '<div class="unread-dot"></div>' : ''}
+    </div>`;
+  }).join('');
+  document.getElementById('chat-badge').classList.toggle('hidden', !hasUnread);
+}
+</script>
+</body>
+</html>
